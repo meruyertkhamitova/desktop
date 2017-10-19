@@ -1,0 +1,114 @@
+***********************************************
+* HP Memristor SPICE Model
+* For Transient Analysis only
+* created by Zdenek and Dalibor Biolek
+***********************************************
+* Ron, Roff - Resistance in ON / OFF States
+*
+* Rinit - Resistance at T=0
+*
+* D - Width of the thin film
+*
+* uv - Migration coefficient
+*
+* p - Parameter of the WINDOW-function for
+*     modeling nonlinear boundary conditions
+*
+* x - W/D Ratio, W is the actual width
+*     of the doped area (from 0 to D)
+*
+***********************************************
+.SUBCKT memristor plus minus PARAMS:
++ Ron=100 Roff=16K Rinit=11K D=10N uv=10F p=1
+ 
+***********************************************
+* DIFFERENTIAL EQUATION MODELING *
+***********************************************
+Gx 0 x value={I(Emem)*uv*Ron/D**2*f(V(x),p)}
+Cx x 0 1 IC={(Roff-Rinit)/(Roff-Ron)}
+Raux x 0 1000000
+ 
+***********************************************
+* RESISTIVE PORT OF THE MEMRISTOR *
+***********************************************
+Emem plus aux value={-I(Emem)*V(x)*(Roff-Ron)}
+Roff aux minus {Roff}
+ 
+***********************************************
+* FLUX COMPUTATION *
+***********************************************
+Eflux flux 0 value={SDT(V(plus,minus))}
+ 
+***********************************************
+* CHARGE COMPUTATION *
+***********************************************
+Echarge charge 0 value={SDT(I(Emem))}
+ 
+***********************************************
+* WINDOW FUNCTIONS
+* FOR NONLINEAR DRIFT MODELING *
+***********************************************
+* window function, according to Joglekar
+.func f(x,p)={1-(2*x-1)**(2*p)}
+ 
+.ENDS memristor
+ 
+Note that I changed the p variable to 1. With p=1 the results will match what’s in the paper.
+
+Create a file called memristor.asy and save it in .../LTSpice/lib/sym. Put the following text in it:
+
+Shell
+
+Version 4
+SymbolType BLOCK
+LINE Normal 8 33 -4 33
+LINE Normal 0 -48 0 -32
+LINE Normal 0 48 0 33
+CIRCLE Normal 4 33 -4 0
+CIRCLE Normal 4 -32 -4 0
+SYMATTR SpiceModel memristor
+SYMATTR Prefix X
+SYMATTR Description Parameterized Memristor
+SYMATTR ModelFile memristor.sub
+PIN 0 -48 RIGHT 8
+PINATTR PinName A
+PINATTR SpiceOrder 1
+PIN 0 48 RIGHT 8
+PINATTR PinName B
+PINATTR SpiceOrder 2
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+Version 4
+SymbolType BLOCK
+LINE Normal 8 33 -4 33
+LINE Normal 0 -48 0 -32
+LINE Normal 0 48 0 33
+CIRCLE Normal 4 33 -4 0
+CIRCLE Normal 4 -32 -4 0
+SYMATTR SpiceModel memristor
+SYMATTR Prefix X
+SYMATTR Description Parameterized Memristor
+SYMATTR ModelFile memristor.sub
+PIN 0 -48 RIGHT 8
+PINATTR PinName A
+PINATTR SpiceOrder 1
+PIN 0 48 RIGHT 8
+PINATTR PinName B
+PINATTR SpiceOrder 2
